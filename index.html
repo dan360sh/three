@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webpack</title>
+    <script type="x-shader/x-vertex" id="vertexShader">
+  varying vec2 vUv;
+
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+</script>
+
+    <script type="x-shader/x-fragment" id="fragmentShader">
+  varying vec2 vUv;
+  uniform vec3 color1;
+  uniform vec3 color2;
+
+  void main() {
+    gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
+  }
+</script>
+<!--    <link rel="stylesheet" href="./dist/styles.css">-->
+</head>
+<body>
+<h1>ПРИВЕТ МИР</h1>
+<div id="your-container-id"></div>
+<script src="./dist/bundle.js"></script>
+</body>
+</html>

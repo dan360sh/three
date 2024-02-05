@@ -1,0 +1,24 @@
+{
+  "name": "web-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "./node_modules/.bin/webpack",
+    "dev": "./node_modules/.bin/webpack --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "style-loader": "^3.3.4",
+    "webpack": "^5.90.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "ammo": "^3.0.3",
+    "cannon": "^0.6.2",
+    "css-loader": "^6.10.0",
+    "three": "^0.161.0",
+    "three-orbitcontrols": "^2.110.3"
+  }
+}
