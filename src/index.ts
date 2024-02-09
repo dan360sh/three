@@ -1,6 +1,4 @@
-import * as THREE from 'three';
-import * as Cannon from 'cannon';
-import * as Orbitcontrols from 'three-orbitcontrols';
+import * as THREE from "three";
 // Three.js сцена
 const scene = new THREE.Scene();
 
@@ -16,32 +14,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 const container = document.getElementById('your-container-id');
 
 // Добавляем рендерер в HTML-элемент
-container.appendChild(renderer.domElement);
+container?.appendChild(renderer.domElement);
 
-// Цвета фона
-const color1 = new THREE.Color(0x3498db);
-const color2 = new THREE.Color(0xe74c3c);
-
-// Uniforms для передачи цветов в шейдер
-const uniforms = {
-    color1: { value: color1 },
-    color2: { value: color2 },
-};
-
-// Геометрия и материал для плоскости (земли)
-const groundGeometry = new THREE.PlaneGeometry(20, 20);
-const groundMaterial = new THREE.ShaderMaterial({
-    uniforms: uniforms,
-    vertexShader: document.getElementById('vertexShader').textContent,
-    fragmentShader: document.getElementById('fragmentShader').textContent,
-});
-const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-ground.rotation.x = -Math.PI ; // Поворачиваем плоскость, чтобы она была параллельна оси Y
-scene.add(ground);
 
 // Загружаем текстуру для фона
 const textureLoader = new THREE.TextureLoader();
-const backgroundTexture = textureLoader.load('https://png.pngtree.com/background/20230401/original/pngtree-romantic-and-beautiful-background-of-stars-and-clouds-picture-image_2235485.jpg');
+const backgroundTexture = textureLoader.load('https://blenderartists.org/uploads/default/original/3X/3/f/3f02f7f73b60903be4f9a00d8d2c28581d42447f.jpg');
 backgroundTexture.encoding = THREE.sRGBEncoding;
 
 // Создаем сферу для отображения текстуры
@@ -50,38 +28,57 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture,
 const backgroundSphere = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 scene.add(backgroundSphere);
 // Создаем Cannon.js физический мир
-const world = new Cannon.World();
-world.gravity.set(0, -9.8, 0); // Гравитация
+//const world = new Cannon.World();
+//world.gravity.set(0, -9.8, 0); // Гравитация
 
 // Создаем Cannon.js статическое тело для земли
-const groundShape = new Cannon.Plane();
-const groundBody = new Cannon.Body({ mass: 0, shape: groundShape });
-world.addBody(groundBody);
+// const groundShape = new Cannon.Plane();
+// const groundBody = new Cannon.Body({ mass: 0, shape: groundShape });
+// world.addBody(groundBody);
 
 // Создаем геометрию и материал для куба
 const cubeGeometry = new THREE.BoxGeometry();
 const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
+
+
+// Создание круглой геометрии
+var radius = 5;
+var segments = 32;
+var geometry = new THREE.CircleGeometry(radius, segments);
+
+// Загрузка текстуры
+const textureLoader2 = new THREE.TextureLoader();
+var texture = textureLoader2.load('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQA7MnevgGl8tO7PLBsk2RNJwcOayCID6qyAA&usqp=CAU');
+
+// Создание материала с текстурой
+var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+
+// Создание меша (объекта) с использованием геометрии и материала
+var circle = new THREE.Mesh(geometry, material);
+circle.position.set(10,10,1)
+// Добавление меша на сцену
+scene.add(circle);
 // Создаем Cannon.js динамическое тело для куба
-const cubeShape = new Cannon.Box(new Cannon.Vec3(0.5, 0.5, 0.5));
-const cubeBody = new Cannon.Body({ mass: 1, shape: cubeShape });
-world.addBody(cubeBody);
+// const cubeShape = new Cannon.Box(new Cannon.Vec3(0.5, 0.5, 0.5));
+// const cubeBody = new Cannon.Body({ mass: 1, shape: cubeShape });
+// world.addBody(cubeBody);
 
 // Добавляем куб на сцену
 scene.add(cube);
-
+cube.position.set(10,1,1)
 // Анимация
 const animate = () => {
     requestAnimationFrame(animate);
 
     // Шаг физического мира
-    world.step(1 / 60);
+    //world.step(1 / 60);
 
     // Обновляем позицию куба
-    cube.position.copy(cubeBody.position);
-    cube.quaternion.copy(cubeBody.quaternion);
-
+    // cube.position.copy(cubeBody.position);
+    // cube.quaternion.copy(cubeBody.quaternion);
+    console.log(cube.position);
     // Рендерим сцену
     renderer.render(scene, camera);
 };
