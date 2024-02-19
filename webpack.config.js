@@ -18,6 +18,28 @@ module.exports = {
                 use: 'ts-loader', // Использовать ts-loader для компиляции TypeScript
                 exclude: /node_modules/, // Исключить папку node_modules
             },
+            {
+                test: /\.(jpg|png|gif|svg)$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[ext]', // сохранять оригинальные имена файлов и их расширения
+                            outputPath: 'img/', // указать папку для сохранения изображений
+                        },
+                    },
+                ],
+            },
         ]
-    }
+    },
+    devServer: {
+        static: {
+            directory: path.join(__dirname),
+            staticOptions: {
+                watch: true, // добавлено
+            },
+        },
+        port: 9000,
+    },
+
 }

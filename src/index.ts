@@ -1,9 +1,52 @@
 import * as THREE from "three";
+import * as CANNON from "cannon";
+import myImage from '../img/lol.jpg';
+const textureLoader = new THREE.TextureLoader();
+
+// Инициализация Cannon.js
+const world = new CANNON.World();
+world.gravity.set(0,-9.8, 0);
 // Three.js сцена
 const scene = new THREE.Scene();
+    // Создание земли
+    const groundShape = new CANNON.Plane();
+    const groundBody = new CANNON.Body({ mass: 0 });
+    groundBody.addShape(groundShape);
+    groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+    world.addBody(groundBody);
+
+    // Создание текстуры земли 
+
+    const groundTexture = textureLoader.load(myImage);
+    groundTexture.wrapS = THREE.RepeatWrapping;
+    groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set(10, 10); // Повторение текстуры
+
+    const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture });
+    const groundGeometry = new THREE.PlaneGeometry(50, 50); // Размер земли
+    const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+    groundMesh.rotation.x = Math.PI/2 + Math.PI;
+    scene.add(groundMesh);
+
+
+
+
+// Создание сферы
+const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+scene.add(sphereMesh);
+
+const sphereShape = new CANNON.Sphere(1);
+const sphereBody = new CANNON.Body({ mass: 5 });
+sphereBody.addShape(sphereShape);
+sphereBody.position.set(0, 5, 10);
+world.addBody(sphereBody);
+    
 
 // Three.js камера
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
 // camera.position.z = -5;
 // camera.position.y = -1;
 
@@ -18,8 +61,8 @@ container?.appendChild(renderer.domElement);
 
 
 // Загружаем текстуру для фона
-const textureLoader = new THREE.TextureLoader();
-const backgroundTexture = textureLoader.load('https://blenderartists.org/uploads/default/original/3X/3/f/3f02f7f73b60903be4f9a00d8d2c28581d42447f.jpg');
+
+const backgroundTexture = textureLoader.load(myImage);
 backgroundTexture.encoding = THREE.sRGBEncoding;
 
 // Создаем сферу для отображения текстуры
@@ -43,78 +86,169 @@ const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
 
 
-// Создание круглой геометрии
+// // Создание круглой геометрии
+// var radius = 5;
+// var segments = 32;
+// var geometry = new THREE.CircleGeometry(radius, segments);
+//
+// // Загрузка текстуры
+// const textureLoader2 = new THREE.TextureLoader();
+// var texture = textureLoader2.load('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQA7MnevgGl8tO7PLBsk2RNJwcOayCID6qyAA&usqp=CAU');
+//
+// // Создание материала с текстурой
+// var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+//
+// // Создание меша (объекта) с использованием геометрии и материала
+// var circle = new THREE.Mesh(geometry, material);
+// circle.position.set(10,10,1)
+// // Добавление меша на сцену
+// scene.add(circle);
+
 var radius = 5;
-var segments = 32;
-var geometry = new THREE.CircleGeometry(radius, segments);
+var widthSegments = 32;
+var heightSegments = 16;
+var geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
 
 // Загрузка текстуры
-const textureLoader2 = new THREE.TextureLoader();
-var texture = textureLoader2.load('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQA7MnevgGl8tO7PLBsk2RNJwcOayCID6qyAA&usqp=CAU');
+var textureLoader2 = new THREE.TextureLoader();
+var texture = textureLoader.load('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQA7MnevgGl8tO7PLBsk2RNJwcOayCID6qyAA&usqp=CAU');
 
 // Создание материала с текстурой
 var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
 
 // Создание меша (объекта) с использованием геометрии и материала
-var circle = new THREE.Mesh(geometry, material);
-circle.position.set(10,10,1)
-// Добавление меша на сцену
-scene.add(circle);
-// Создаем Cannon.js динамическое тело для куба
-// const cubeShape = new Cannon.Box(new Cannon.Vec3(0.5, 0.5, 0.5));
-// const cubeBody = new Cannon.Body({ mass: 1, shape: cubeShape });
-// world.addBody(cubeBody);
+var sphere = new THREE.Mesh(geometry, material);
 
+// Добавление меша на сцену
+scene.add(sphere);
+sphere.position.set(20,6,1);
+//alert('fgfgfgfg')
 // Добавляем куб на сцену
 scene.add(cube);
 cube.position.set(10,1,1)
+sphereBody.allowSleep = false;
 // Анимация
 const animate = () => {
     requestAnimationFrame(animate);
 
-    // Шаг физического мира
-    //world.step(1 / 60);
+          // Обновление физики
+          world.step(1 / 60);
+          sphereBody.applyLocalForce(moveDirection, new CANNON.Vec3(0, 0, 0));
+          
+          // Обновление позиции сферы в соответствии с физикой
+          sphereMesh.position.copy(sphereBody.position as any);
 
-    // Обновляем позицию куба
-    // cube.position.copy(cubeBody.position);
-    // cube.quaternion.copy(cubeBody.quaternion);
-    console.log(cube.position);
-    // Рендерим сцену
+          sphereMesh.quaternion.copy(sphereBody.quaternion as any);
+          
     renderer.render(scene, camera);
 };
 let step = 1 / 360000;
 let rotateBefore = {z: 0, y: 0};
 let rotateCamera = {z: 0, y: 0};
-document.addEventListener('mousemove', (e)=> {
-    if(rotateBefore.z < e.x){
-        rotateCamera.z =  -0.01;
-    } else if (rotateBefore.z > e.x){
-        rotateCamera.z = 0.01;
+
+// document.addEventListener('mousemove', (e)=> {
+//     if(rotateBefore.z < e.x){
+//         rotateCamera.z =  -0.01;
+//     } else if (rotateBefore.z > e.x){
+//         rotateCamera.z = 0.01;
+//     }
+//
+//     // if (1 < rotateCamera.z) {
+//     //     rotateCamera.z = 0;
+//     // }else if(rotateCamera.z < 0 ) {
+//     //     rotateCamera.z = Math.PI;
+//     // }
+//
+//     if(rotateBefore.y < e.y){
+//         rotateCamera.y =  -0.01;
+//     }else if (rotateBefore.y > e.y){
+//         rotateCamera.y =  0.01;
+//     }
+//
+//     // if (1 < rotateCamera.y) {
+//     //     rotateCamera.y = 0;
+//     // }else if(rotateCamera.y < 0 ) {
+//     //     rotateCamera.y = Math.PI;
+//     // }
+//     rotateBefore.z = e.x;
+//     rotateBefore.y = e.y;
+//     camera.rotateX(rotateCamera.y);
+//     camera.rotateY(rotateCamera.z);
+//     //console.log(e.x, e.y, e);
+// })
+
+let rotateVector = new THREE.Vector3(0,3.5779,0);
+camera.rotation.setFromVector3(rotateVector);
+
+const moveForce = 15;
+const moveDirection = new CANNON.Vec3(0, 0, 0);
+
+function handleKeyDown(event: any) {
+    const speed = 10*Math.PI / 360;
+  
+    // let moveVector = new THREE.Vector3(rotateVector.x % 2* Math.PI, rotateVector.y % 2* Math.PI, rotateVector.z % 2* Math.PI);
+    // moveVector.setLength(0.1);
+    let position = new THREE.Vector3();
+    //console.log(moveVector.length());
+    //moveVector.setLength(1)
+    switch (event.key) {
+        case 'ArrowUp':
+            // Перемещение вперед в направлении взгляда камеры
+            //moveVector.z += -speed;
+            //moveVector.addScalar(speed);
+            position = cameraPosition(rotateVector, -speed);
+            break;
+        case 'ArrowDown':
+            // Перемещение назад в направлении взгляда камеры
+            //moveVector.z += speed;
+            position = cameraPosition(rotateVector, speed);
+            break;
+        case 'ArrowLeft':
+            // Поворот влево
+            rotateVector.y += speed;
+            //moveVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.1);
+            break;
+        case 'ArrowRight':
+            rotateVector.y += -speed;
+            // Поворот вправо
+            //moveVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), -0.1);
+            break;
     }
 
-    // if (1 < rotateCamera.z) {
-    //     rotateCamera.z = 0;
-    // }else if(rotateCamera.z < 0 ) {
-    //     rotateCamera.z = Math.PI;
-    // }
-
-    if(rotateBefore.y < e.y){
-        rotateCamera.y =  -0.01;
-    }else if (rotateBefore.y > e.y){
-        rotateCamera.y =  0.01;
+    switch (event.keyCode) {
+        case 32:
+            position.setY(speed);
+            break;
+        case 16:
+            position.setY(-speed);
+            break;
+            case 87:
+                console.log('dfdfdfdfdf')
+                moveDirection.z = -moveForce
+                break;
+            case 83:
+                moveDirection.z = moveForce
+                break;
+            case 65:
+                moveDirection.x = -moveForce
+                break;
+            case 68:
+                
+                moveDirection.x = moveForce
+                break;
     }
+    console.log(event.keyCode)
 
-    // if (1 < rotateCamera.y) {
-    //     rotateCamera.y = 0;
-    // }else if(rotateCamera.y < 0 ) {
-    //     rotateCamera.y = Math.PI;
-    // }
-    rotateBefore.z = e.x;
-    rotateBefore.y = e.y;
-    console.log(rotateCamera)
-    camera.rotateX(rotateCamera.y);
-    camera.rotateY(rotateCamera.z);
-    //console.log(e.x, e.y, e);
-})
+    camera.rotation.setFromVector3(rotateVector);
+    // Применяем движение к кубу
+    camera.position.add(position);
+    
+    console.log(rotateVector, 'moveVector z',);
+}
+function cameraPosition (rotateVector: THREE.Vector3, speed: number): THREE.Vector3{
+    return new THREE.Vector3( Math.sin(rotateVector.y), 0, Math.cos(rotateVector.y)).setLength(speed);
+}
+
+document.addEventListener('keydown', handleKeyDown);
 // Запускаем анимацию
 animate();
