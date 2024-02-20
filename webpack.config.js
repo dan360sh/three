@@ -3,6 +3,9 @@ module.exports = {
     mode: 'development',
     entry: './src/index.ts',
     devtool: 'source-map',
+    resolve: {
+        extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    },
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js'
